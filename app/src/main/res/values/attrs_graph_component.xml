@@ -1,0 +1,6 @@
+<resources>
+    <declare-styleable name="GraphComponent">
+        <attr name="stroke" format="float" />
+        <attr name="lineColor" format="color" />
+    </declare-styleable>
+</resources>
