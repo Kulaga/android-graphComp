@@ -134,40 +134,4 @@ public class GraphComponent extends RelativeLayout{
             }
         });
     }
-
 }
-/*
-public class GraphComponent extends View {
-    private int mLineColor = Color.RED;
-    private int mContentWidth;
-    private int mContentHeight;
-    private float scaleX;
-    private float scaleY;
-    private ArrayList<PointF> xy = null;
-
-    public GraphComponent(Context context) {
-        super(context);
-        init(null, 0);
-    }
-
-    public GraphComponent(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        init(attrs, 0);
-    }
-
-    public GraphComponent(Context context, AttributeSet attrs, int defStyle) {
-        super(context, attrs, defStyle);
-        init(attrs, defStyle);
-    }
-
-    private void init(AttributeSet attrs, int defStyle) {
-        // Load attributes
-        final TypedArray a = getContext().obtainStyledAttributes(
-                attrs, R.styleable.GraphComponent, defStyle, 0);
-
-        mLineColor = a.getColor(
-                R.styleable.GraphComponent_lineColor, mLineColor);
-
-        a.recycle();
-    }
-*/
