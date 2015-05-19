@@ -3,6 +3,7 @@ package com.rfe.graphcomponent;
 import android.graphics.PointF;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -19,9 +20,12 @@ public class MainActivity extends ActionBarActivity {
 
         ArrayList<PointF> p = new ArrayList<PointF>();
         Random rand = new Random();
-        for(int i=0; i<20; i++){
-            p.add(new PointF(rand.nextFloat() * 10, rand.nextFloat() * 10));
+        for (int i = 0; i < 50; i++) {
+            p.add(new PointF(rand.nextFloat(), rand.nextFloat()));
         }
+        //p.add(new PointF(60, 70));
+        //p.add(new PointF(55, 55));
+        //p.add(new PointF(40, 90));
         GraphComponent gc = (GraphComponent) findViewById(R.id.plot);
         gc.setXY(p);
     }
