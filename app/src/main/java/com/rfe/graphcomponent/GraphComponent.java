@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -25,9 +26,9 @@ import java.util.Iterator;
 
 public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarChangeListener{
 
-    private float scaleX;
-    private float scaleY;
-    private int progress = 0;
+    private float mScaleX;
+    private float mScaleY;
+    private int mProgress = 0;
     private int lineColor;
     private float gridStroke;
     private int barWidth;
@@ -35,6 +36,9 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
     private float mLowerBound;
     private float mTickSize;
     private float mUpperBound;
+    private float markerRadius = 5;
+    private int mSelectedMarker = -1;
+    private float mPointerX;
     private int barHeight;
     private ArrayList<PointF> xy = null;
     private PointF[] cornerPoints = new PointF[2];
@@ -58,8 +62,8 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
     }
 
     private void setScale(){
-        scaleX = (((float) barWidth) - barHeight) / (cornerPoints[1].x - cornerPoints[0].x);
-        scaleY = ((float) getHeight() - getPaddingTop() - getPaddingBottom() - 3 * barHeight)
+        mScaleX = ((float) barWidth - barHeight) / (cornerPoints[1].x - cornerPoints[0].x);
+        mScaleY = ((float) getHeight() - getPaddingTop() - getPaddingBottom() - 4 * barHeight)
                 / (mUpperBound - mLowerBound);
     }
 
@@ -85,15 +89,29 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
 
         if (xy == null)
             return;
+
         setCornerPoints();
         if (cornerPoints[0].x <0 || cornerPoints[1].y  < 0)
             throw new NumberFormatException();
+
         setBounds();
         setScale();
         drawArea(canvas);
         drawPath(canvas);
-        drawGrid(canvas);
         drawNormalLine(canvas);
+        drawGrid(canvas);
+        drawMarkers(canvas);
+        drawValues(canvas);
+    }
+
+    private void drawValues(Canvas canvas){
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setStrokeWidth(1);
+        paint.setTextSize(30);
+        canvas.drawText("Speed: " + String.format("%.2f",findYatX(mPointerX)) + " km/h",
+                (float)barHeight / 2, (float) 2 * barHeight, paint);
     }
 
     private void setBounds(){
@@ -107,7 +125,7 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
         mTickSize = roundedTickSize;
         mLowerBound = roundedTickSize * ((int)(cornerPoints[1].y / roundedTickSize));
         mUpperBound = roundedTickSize * ((int)(1 + cornerPoints[0].y / roundedTickSize));
-
+        
     }
 
     private void drawGrid(Canvas canvas){
@@ -116,7 +134,13 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
         paint.setAlpha(250);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(1);
-        for(int i=0; i < 4; i++){
+
+        int ticks = 4;
+        if(mUpperBound > mTickSize * ticks)
+            ticks++;
+
+        int i = 0;
+        while(mLowerBound + mTickSize * i <= mUpperBound){
             Path path = new Path();
             float currentY = mLowerBound + mTickSize * i;
             PointF p = transformPoint(new PointF(cornerPoints[0].x, currentY));
@@ -126,19 +150,72 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
             path.lineTo(p1.x, p1.y);
             canvas.drawPath(path, paint);
             canvas.drawTextOnPath(String.format("%.2f", currentY) + " km/h", path, 10, -10, paint);
+            i++;
+        }
+    }
+
+    private int findSelectedMarker(){
+        PointF crossPoint = transformPoint(new PointF(mPointerX, findYatX(mPointerX)));
+
+        int i = 0;
+        for(PointF p: xy){
+            PointF p1 = transformPoint(p);
+            double deltaX = p1.x - crossPoint.x;
+            double deltaY = p1.y - crossPoint.y;
+            float distance = (float) Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
+
+            if (distance <= 2 * markerRadius)
+                return i;
+            i++;
+        }
+        return -1;
+    }
+
+    private void drawMarkers(Canvas canvas){
+        Paint paint = new Paint();
+        paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setStrokeWidth(1);
+
+        int selectedMarker = findSelectedMarker();
+
+        int i = 0;
+        for(PointF p: xy){
+            PointF transPoint = transformPoint(p);
+            if (i == selectedMarker)
+                canvas.drawCircle(transPoint.x, transPoint.y, 2 * markerRadius, paint);
+            else
+                canvas.drawCircle(transPoint.x, transPoint.y, markerRadius, paint);
+            i++;
         }
     }
 
     private void drawNormalLine(Canvas canvas){
         Paint paint = new Paint();
         paint.setColor(Color.WHITE);
-        paint.setStrokeWidth(2);
+        paint.setStrokeWidth(1);
 
-        float x = cornerPoints[0].x + (cornerPoints[1].x - cornerPoints[0].x)
-                * progress / 100;
-        PointF p = transformPoint( new PointF(x, mLowerBound));
-        PointF p1 = transformPoint( new PointF(x, mUpperBound));
+        mPointerX = cornerPoints[0].x + (cornerPoints[1].x - cornerPoints[0].x)
+                * mProgress / 100f;
+        PointF p = transformPoint( new PointF(mPointerX, mLowerBound));
+        PointF p1 = transformPoint( new PointF(mPointerX, mUpperBound));
         canvas.drawLine(p.x, p.y, p1.x, p1.y, paint);
+    }
+
+    private float findYatX(float x){
+        PointF p1 = null, p2 = null;                             // p3.x < x < p4.x
+        for(PointF p: xy){
+            if(p.x == x)
+                return p.y;
+            if(p1 != null){
+                if (p1.x < x && x < p.x){
+                    p2 = p;
+                    break;
+                }
+            }
+            p1 = p;
+        }
+        return (x - p1.x) * (p2.y - p1.y) / (p2.x - p1.x) + p1.y;
     }
 
     private void drawPath(Canvas canvas) {
@@ -181,10 +258,10 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
 
     private PointF transformPoint(PointF p){
         int totalPaddingX = barHeight / 2 + getPaddingLeft();
-        int totalPaddingY = getPaddingTop() +  2 * barHeight;
+        int totalPaddingY = getPaddingTop() +  3 * barHeight;
 
-        return new PointF((p.x - cornerPoints[0].x) * scaleX + totalPaddingX,
-                (mUpperBound - p.y) * scaleY + totalPaddingY);
+        return new PointF((p.x - cornerPoints[0].x) * mScaleX + totalPaddingX,
+                (mUpperBound - p.y) * mScaleY + totalPaddingY);
     }
 
     public void setXY(ArrayList<PointF> xy){
@@ -212,7 +289,7 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        this.progress = progress;
+        this.mProgress = progress;
         postInvalidate();
 
     }

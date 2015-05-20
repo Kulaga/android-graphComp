@@ -20,12 +20,10 @@ public class MainActivity extends ActionBarActivity {
 
         ArrayList<PointF> p = new ArrayList<PointF>();
         Random rand = new Random();
-        for (int i = 0; i < 50; i++) {
-            p.add(new PointF(rand.nextFloat(), rand.nextFloat()));
+        for (int i = 0; i < 10; i++) {
+            p.add(new PointF(rand.nextInt(300), rand.nextInt(300)));
+            Log.i("Points", Float.toString(p.get(i).x) + " " + Float.toString(p.get(i).y));
         }
-        //p.add(new PointF(60, 70));
-        //p.add(new PointF(55, 55));
-        //p.add(new PointF(40, 90));
         GraphComponent gc = (GraphComponent) findViewById(R.id.plot);
         gc.setXY(p);
     }
