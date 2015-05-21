@@ -3,6 +3,7 @@ package com.rfe.graphcomponent;
 import android.graphics.PointF;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +26,7 @@ public class MainActivity extends ActionBarActivity {
             Log.i("Points", Float.toString(p.get(i).x) + " " + Float.toString(p.get(i).y));
         }
         GraphComponent gc = (GraphComponent) findViewById(R.id.plot);
-        gc.setXY(p);
+        gc.setOriginalData(p);
     }
 
 

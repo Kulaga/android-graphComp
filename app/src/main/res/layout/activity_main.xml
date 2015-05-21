@@ -9,10 +9,13 @@
 
     <com.rfe.graphcomponent.GraphComponent
         android:id = "@+id/plot"
-        android:background="#000000"
+        android:background="#ffffffff"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        app:lineColor="#007DFF"
+        app:strokeColor="#ffffc025"
+        app:areaColor="#96ffc025"
+        app:textColor="#ff000000"
+        app:gridColor="#96000000"
         android:layout_alignParentBottom="true" />
 
 </RelativeLayout>
