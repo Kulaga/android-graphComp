@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -22,6 +23,8 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
     private float mScaleY;
     private int mProgress = 0;
     private int mBarWidth;
+    private Context mContext = null;
+    private float mTextSize = 3;
     private int mStrokeColor = 0xFF007DFF;
     private int mAreaColor = 0x96007DFF;
     private int mTextColor = Color.WHITE;
@@ -32,18 +35,20 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
     private float mUpperBound;
     private float markerRadius = 5;
     private float mPointerX;
-    private int barHeight;
+    private int mBarHeight;
     private ArrayList<PointF> mOriginalData = null;
     private PointF[] mCornerPoints = new PointF[2];
 
 
     public GraphComponent(Context context, AttributeSet attrs) {
         super(context, attrs);
+        mContext = context;
         LayoutInflater inflater = LayoutInflater.from(context);
         inflater.inflate(R.layout.plot_layout, this, true);
 
         SeekBar seekBar = (SeekBar) findViewById(R.id.bar);
         seekBar.setOnSeekBarChangeListener(this);
+        seekBar.setMax(1000);
 
         final TypedArray a = getContext().obtainStyledAttributes(
                 attrs, R.styleable.GraphComponent, 0, 0);
@@ -59,13 +64,19 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
         mGridColor = a.getColor(
                 R.styleable.GraphComponent_gridColor, mGridColor);
         a.recycle();
+
+        mTextSize = dpToPixels(15);
+        Log.i("Density", Float.toString(mContext.getResources().getDisplayMetrics().scaledDensity));
     }
 
 
+    float dpToPixels(float sp) {
+        return sp * mContext.getResources().getDisplayMetrics().scaledDensity;
+    }
 
     private void setScale(){
-        mScaleX = ((float) mBarWidth - barHeight) / (mCornerPoints[1].x - mCornerPoints[0].x);
-        mScaleY = ((float) getHeight() - getPaddingTop() - getPaddingBottom() - 4 * barHeight)
+        mScaleX = ((float) mBarWidth - mBarHeight) / (mCornerPoints[1].x - mCornerPoints[0].x);
+        mScaleY = ((float) getHeight() - getPaddingTop() - getPaddingBottom() - 4 * mBarHeight)
                 / (mUpperBound - mLowerBound);
     }
 
@@ -87,7 +98,7 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
 
         SeekBar bar = (SeekBar) findViewById(R.id.bar);
         mBarWidth = bar.getWidth();
-        barHeight = bar.getHeight();
+        mBarHeight = bar.getHeight();
 
         if (mOriginalData == null)
             return;
@@ -109,11 +120,11 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
     private void drawValues(Canvas canvas){
         Paint paint = new Paint();
         paint.setColor(mTextColor);
-        paint.setStyle(Paint.Style.FILL);
-        paint.setStrokeWidth(1);
-        paint.setTextSize(30);
-        canvas.drawText("Speed: " + String.format("%.2f",findYatX(mPointerX)) + " km/h",
-                (float)barHeight / 2, (float) 2 * barHeight + getPaddingTop(), paint);
+        paint.setStyle(Paint.Style.FILL_AND_STROKE);
+        paint.setStrokeWidth(dpToPixels(1));
+        paint.setTextSize(mTextSize);
+        canvas.drawText("Speed: " + String.format("%.2f", findYatX(mPointerX)) + " km/h",
+                (float) mBarHeight / 2, (float) 2 * mBarHeight + getPaddingTop(), paint);
     }
 
     private void setBounds(){
@@ -135,7 +146,7 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
         paint.setColor(mGridColor);
         paint.setAlpha(250);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(1);
+        paint.setStrokeWidth(dpToPixels(1));
 
         int i = 0;
         while(mLowerBound + mTickSize * i <= mUpperBound){
@@ -148,6 +159,8 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
             path.lineTo(p1.x, p1.y);
             canvas.drawPath(path, paint);
             paint.setColor(mTextColor);
+            paint.setTextSize(mTextSize);
+            paint.setStyle(Paint.Style.FILL_AND_STROKE);
             canvas.drawTextOnPath(String.format("%.2f", currentY) + " km/h", path, 10, -10, paint);
             paint.setColor(mGridColor);
             i++;
@@ -175,7 +188,7 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
         Paint paint = new Paint();
         paint.setColor(mStrokeColor);
         paint.setStyle(Paint.Style.FILL);
-        paint.setStrokeWidth(1);
+        paint.setStrokeWidth(dpToPixels(1));
 
         int selectedMarker = findSelectedMarker();
 
@@ -193,10 +206,10 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
     private void drawPointer(Canvas canvas){
         Paint paint = new Paint();
         paint.setColor(mGridColor);
-        paint.setStrokeWidth(1);
+        paint.setStrokeWidth(dpToPixels(1));
 
         mPointerX = mCornerPoints[0].x + (mCornerPoints[1].x - mCornerPoints[0].x)
-                * mProgress / 100f;
+                * mProgress / 1000f;
         PointF p = transformPoint( new PointF(mPointerX, mLowerBound));
         PointF p1 = transformPoint( new PointF(mPointerX, mUpperBound));
         canvas.drawLine(p.x, p.y, p1.x, p1.y, paint);
@@ -220,7 +233,7 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
         Paint paint = new Paint();
         paint.setColor(mStrokeColor);
         paint.setStyle(Paint.Style.STROKE);
-        paint.setStrokeWidth(mStrokeWidth);
+        paint.setStrokeWidth(dpToPixels(1));
 
         PointF currentPoint = null;
         for(PointF p: mOriginalData) {
@@ -254,8 +267,8 @@ public class GraphComponent extends RelativeLayout implements SeekBar.OnSeekBarC
     }
 
     private PointF transformPoint(PointF p){
-        int totalPaddingX = barHeight / 2 + getPaddingLeft();
-        int totalPaddingY = getPaddingTop() +  3 * barHeight;
+        int totalPaddingX = mBarHeight / 2 + getPaddingLeft();
+        int totalPaddingY = getPaddingTop() + 3 * mBarHeight;
 
         return new PointF((p.x - mCornerPoints[0].x) * mScaleX + totalPaddingX,
                 (mUpperBound - p.y) * mScaleY + totalPaddingY);
