@@ -17,16 +17,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.seekbar_layout);
+        setContentView(R.layout.activity_main);
 
-//        ArrayList<PointF> p = new ArrayList<PointF>();
-//        Random rand = new Random();
-//        for (int i = 0; i < 10; i++) {
-//            p.add(new PointF(rand.nextInt(300), rand.nextInt(300)));
-//            Log.i("Points", Float.toString(p.get(i).x) + " " + Float.toString(p.get(i).y));
-//        }
-//        GraphComponent gc = (GraphComponent) findViewById(R.id.plot);
-//        gc.setOriginalData(p);
+        ArrayList<PointF> p = new ArrayList<>();
+        Random rand = new Random();
+        for (int i = 0; i < 10; i++) {
+            p.add(new PointF(rand.nextInt(300), rand.nextInt(300)));
+            Log.i("Points", Float.toString(p.get(i).x) + " " + Float.toString(p.get(i).y));
+        }
+        GraphComponent gc = (GraphComponent) findViewById(R.id.plot);
+        gc.setOriginalData(p);
     }
 
 
