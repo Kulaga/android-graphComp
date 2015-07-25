@@ -159,6 +159,7 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
 
         paint.setColor(mFlagColor);
         paint.setStyle(Paint.Style.FILL);
+        paint.setAntiAlias(false);
         canvas.drawPath(flag, paint);
 
         paint.setColor(Color.BLACK);
@@ -169,6 +170,8 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
         paint.setStrokeWidth(2);
         PointF p1 = transformPoint(p);
         w = p1.x + w < getWidth() ? w / 6 : -w * 5 / 6;
+
+        paint.setAntiAlias(true);
         canvas.drawText(text, p1.x + w, p1.y - h * 0.5f, paint);
     }
 
@@ -201,10 +204,14 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
             path.moveTo(p.x, p.y);
             path.lineTo(p1.x, p1.y);
             canvas.drawPath(path, paint);
+
             paint.setColor(mTextColor);
             paint.setTextSize(mTextSize);
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
+            paint.setAntiAlias(true);
             canvas.drawTextOnPath(String.format("%.0f", currentY) + " km/h", path, 10, -10, paint);
+
+            paint.setAntiAlias(false);
             paint.setColor(mGridColor);
             i++;
         }
