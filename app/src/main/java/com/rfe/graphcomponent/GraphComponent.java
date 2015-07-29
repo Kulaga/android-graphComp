@@ -26,7 +26,7 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
     private int mAreaColor = 0x96007DFF;
     private int mTextColor = Color.WHITE;
     private int mGridColor = Color.WHITE;
-    private int mFlagColor = 0xc8c9c538;
+    private int mFlagColor = 0xffdcdcdc;
     private float mStrokeWidth = 3;
     private float mLowerBound;
     private float mTickSize;
@@ -44,10 +44,12 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
     public GraphComponent(Context context, AttributeSet attrs) {
         super(context, attrs);
         mContext = context;
-        LayoutInflater inflater = LayoutInflater.from(context);
-        inflater.inflate(R.layout.plot_layout, this, true);
 
-        mCustomSeekBar = (CustomSeekBar) findViewById(R.id.customSeekBar);
+        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
+        mCustomSeekBar = new CustomSeekBar(context);
+        addView(mCustomSeekBar, params);
+
         mCustomSeekBar.setOnSeekBarChangeListener(this);
         mCustomSeekBar.setMax(1000);
         mCustomSeekBar.setCustomPointsMode(true);
@@ -117,7 +119,7 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
         if (mOriginalData == null)
             return;
 
-        drawArea(canvas);
+        //drawArea(canvas);
         drawPath(canvas);
         drawMarkers(canvas);
         drawGrid(canvas);
@@ -160,7 +162,10 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
         paint.setColor(mFlagColor);
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(false);
+        paint.setShadowLayer(4, 5, 5, 0xFF000000);
         canvas.drawPath(flag, paint);
+        paint.setShadowLayer(0, 0, 0, 0);
+
 
         paint.setColor(Color.BLACK);
         paint.setStyle(Paint.Style.STROKE);
@@ -190,7 +195,6 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
 
     private void drawGrid(Canvas canvas) {
         paint.setColor(mGridColor);
-        paint.setAlpha(250);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(dpToPixels(1));
 
@@ -227,6 +231,7 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
         paint.setColor(mStrokeColor);
         paint.setStyle(Paint.Style.FILL);
         paint.setStrokeWidth(dpToPixels(1));
+        paint.setAntiAlias(true);
 
         for (PointF p : mOriginalData) {
             PointF p1 = transformPoint(p);
@@ -235,23 +240,26 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
             else
                 canvas.drawCircle(p1.x, p1.y, dpToPixels(markerRadius), paint);
         }
+        paint.reset();
     }
 
     private void drawPath(Canvas canvas) {
         paint.setColor(mStrokeColor);
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeWidth(dpToPixels(mStrokeWidth));
-
+        paint.setAntiAlias(true);
 
         PointF currentPoint = null;
         for (PointF p : mOriginalData) {
             if (currentPoint != null) {
+
                 PointF nextPoint = transformPoint(p);
                 canvas.drawLine(currentPoint.x, currentPoint.y,
                         nextPoint.x, nextPoint.y, paint);
             }
             currentPoint = transformPoint(p);
         }
+        paint.reset();
     }
 
     private void drawArea(Canvas canvas) {
@@ -271,7 +279,7 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
         path.lineTo(end.x, end.y);
         path.close();
         canvas.drawPath(path, paint);
-
+        paint.reset();
     }
 
     private PointF transformPoint(PointF p) {

@@ -44,17 +44,19 @@ public class CustomSeekBar extends ProgressBar {
     private boolean isCustomPointsMode = false;
 
 
-    public CustomSeekBar(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        barBounds = new Rect();
-        paint = new Paint();
+    public CustomSeekBar(Context context) {
+        super(context, null, android.R.attr.progressBarStyleHorizontal);
+
         setProgressDrawable(getResources().getDrawable(android.R.drawable.progress_horizontal));
         thumb = getResources().getDrawable(R.drawable.abc_btn_radio_material);
         setMax(1000);
+
+        barBounds = new Rect();
+        paint = new Paint();
+
         thumbOffset = THUMB_HEIGHT / 2;
         thumbPosition.x = THUMB_HEIGHT / 2;
         thumbPosition.y = THUMB_HEIGHT / 2;
-
     }
 
     @Override
@@ -91,18 +93,15 @@ public class CustomSeekBar extends ProgressBar {
     @Override
     protected synchronized void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-
-        paint.setColor(Color.BLACK);
-        paint.setStrokeWidth(1);
-
         drawLine(canvas);
-
         thumb.setBounds(thumbPosition.x - thumbOffset, thumbPosition.y - thumbOffset,
                 thumbPosition.x + thumbOffset, thumbPosition.y + thumbOffset);
         thumb.draw(canvas);
     }
 
     private void drawLine(Canvas canvas) {
+        paint.setColor(Color.BLACK);
+        paint.setStrokeWidth(1);
         canvas.drawLine(thumbPosition.x, thumbPosition.y,
                 thumbPosition.x, getHeight() - getPaddingBottom(), paint);
     }

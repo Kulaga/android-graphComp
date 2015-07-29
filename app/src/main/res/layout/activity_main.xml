@@ -5,15 +5,24 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
     <com.rfe.graphcomponent.GraphComponent
         android:id="@+id/plot"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="#ffffffff"
-        app:areaColor="#96ffc025"
-        app:gridColor="#96000000"
-        app:strokeColor="#ffffc025"
-        app:textColor="#ff000000" />
+        android:background="#ff5a5a5a"
+        app:areaColor="#ff818181"
+        app:gridColor="#ffdcdcdc"
+        app:strokeColor="#ff40c5ff"
+        app:textColor="#ffdcdcdc" />
+
+    <!--<com.rfe.graphcomponent.GraphComponent-->
+    <!--android:id="@+id/plot"-->
+    <!--android:layout_width="fill_parent"-->
+    <!--android:layout_height="fill_parent"-->
+    <!--android:background="#ffffffff"-->
+    <!--app:areaColor="#96ffc025"-->
+    <!--app:gridColor="#96000000"-->
+    <!--app:strokeColor="#ffffc025"-->
+    <!--app:textColor="#ff000000" />-->
 
 </LinearLayout>
