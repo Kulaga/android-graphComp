@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.widget.RelativeLayout;
 
 import java.util.ArrayList;
@@ -17,32 +16,29 @@ import java.util.Comparator;
 
 public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSeekBarChangeListener {
 
-    private float mScaleX;
-    private float mScaleY;
-    private int mProgress = 0;
+    private float mScaleX, mScaleY;
     private Context mContext = null;
-    private int mTextSize;
-    private int mStrokeColor = 0xFF007DFF;
-    private int mAreaColor = 0x96007DFF;
-    private int mTextColor = Color.WHITE;
-    private int mGridColor = Color.WHITE;
-    private int mFlagColor = 0xffdcdcdc;
-    private float mStrokeWidth = 3;
-    private float mLowerBound;
+    private float mTextSize;
     private float mTickSize;
-    private float mUpperBound;
+    private int mStrokeColor, mAreaColor, mTextColor, mGridColor, mFlagColor, mBackColor;
+    private int mBarWidth, mBarHeight;
+    private float mLowerBound, mUpperBound;
     private final float markerRadius = 5;
-    private int mBarWidth;
-    private int mBarHeight;
+    private float mStrokeWidth = 3;
+    private int mProgress = 0;
+
+    private CustomSeekBar mCustomSeekBar = null;
     Paint paint = new Paint();
     private ArrayList<PointF> mOriginalData = null;
     private PointF[] mCornerPoints = new PointF[2];
     private int mRangeOfProgress = 1000;
-    private CustomSeekBar mCustomSeekBar = null;
-
 
     public GraphComponent(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, R.attr.CustomPlotStyle);
+    }
+
+    public GraphComponent(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
         mContext = context;
 
         RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
@@ -56,18 +52,20 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
         mBarHeight = mCustomSeekBar.getThumbHeight();
 
         final TypedArray a = getContext().obtainStyledAttributes(
-                attrs, R.styleable.GraphComponent, 0, 0);
+                attrs, R.styleable.GraphComponent, defStyleAttr, R.style.defaultPlotStyle);
 
+        setBackgroundColor(a.getColor(R.styleable.GraphComponent_backgroundColor, 0));
         mStrokeColor = a.getColor(
-                R.styleable.GraphComponent_strokeColor, mStrokeColor);
+                R.styleable.GraphComponent_strokeColor, 0);
         mAreaColor = a.getColor(
-                R.styleable.GraphComponent_areaColor, mAreaColor);
+                R.styleable.GraphComponent_areaColor, 0);
         mTextColor = a.getColor(
-                R.styleable.GraphComponent_textColor, mTextColor);
+                R.styleable.GraphComponent_textColor, 0);
         mGridColor = a.getColor(
-                R.styleable.GraphComponent_gridColor, mGridColor);
+                R.styleable.GraphComponent_gridColor, 0);
         mFlagColor = a.getColor(
-                R.styleable.GraphComponent_flagColor, mFlagColor);
+                R.styleable.GraphComponent_flagColor, 0);
+
         a.recycle();
     }
 
@@ -81,12 +79,16 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
         mCustomSeekBar.setProgressPoints(a);
     }
 
-    float dpToPixels(float sp) {
+    float spToPixels(float sp) {
         return sp * mContext.getResources().getDisplayMetrics().scaledDensity;
     }
 
+    float dpToPixels(float dp) {
+        return dp * mContext.getResources().getDisplayMetrics().density;
+    }
+
     private void setScale() {
-        int flagHeight = 3 * mTextSize;
+        float flagHeight = 3 * mTextSize;
         mScaleX = ((float) mBarWidth - mBarHeight) / (mCornerPoints[1].x - mCornerPoints[0].x);
         mScaleY = ((float) getHeight() - getPaddingTop() - getPaddingBottom() - mBarHeight -
                 flagHeight) / (mUpperBound - mLowerBound);
@@ -108,7 +110,7 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         mBarWidth = w;
-        mTextSize = w < h ? w / 20 : h / 20;
+        mTextSize = spToPixels(16);
         setScale();
     }
 
@@ -283,9 +285,9 @@ public class GraphComponent extends RelativeLayout implements CustomSeekBar.OnSe
     }
 
     private PointF transformPoint(PointF p) {
-        int flagHeight = 3 * mTextSize;
-        int totalPaddingX = mBarHeight / 2 + getPaddingLeft();
-        int totalPaddingY = getPaddingTop() + flagHeight + mBarHeight;
+        float flagHeight = 3 * mTextSize;
+        float totalPaddingX = mBarHeight / 2 + getPaddingLeft();
+        float totalPaddingY = getPaddingTop() + flagHeight + mBarHeight;
 
         return new PointF((p.x - mCornerPoints[0].x) * mScaleX + totalPaddingX,
                 (mUpperBound - p.y) * mScaleY + totalPaddingY);

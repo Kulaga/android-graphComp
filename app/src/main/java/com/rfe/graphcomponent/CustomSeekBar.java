@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import java.util.Arrays;
 
@@ -173,7 +174,6 @@ public class CustomSeekBar extends ProgressBar {
         int point = progressPoints[0];
         while (lo <= hi) {
             int mid = lo + (hi - lo) / 2;
-
             if (Math.abs(progressPoints[mid] - key) < Math.abs(key - point))
                 point = progressPoints[mid];
 

@@ -5,4 +5,12 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="defaultPlotStyle">
+        <item name="backgroundColor">#ff5a5a5a</item>
+        <item name="areaColor">#ff818181</item>
+        <item name="gridColor">#ffdcdcdc</item>
+        <item name="strokeColor">#ffffac00</item>
+        <item name="textColor">#ffdcdcdc</item>
+        <item name="flagColor">#ffdcdcdc</item>
+    </style>
 </resources>
